@@ -1,4 +1,4 @@
-# SkiRacerGame
+# QubiGame
 Qubi Game - Endless runner using your breadth to power up Qubi to give a super boost to compelete the levels
 
 This project was developed at ICHealth Hack s as part of the Project Fizzyo (http://fizzyo.github.io) Project team Supervised by - Prof. Eleanor Main of UCL/GOSH
