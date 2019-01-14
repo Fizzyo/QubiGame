@@ -30,7 +30,7 @@ public class Player : MonoBehaviour {
         //float fizzyoVal = Input.GetAxisRaw("Horizontal");
 
         //get the pressure value from our fizzyo device or logged pressure data if useRecordedData is set to true.
-        float pressure = FizzyoDevice.Instance().Pressure();
+        float pressure = Fizzyo.FizzyoFramework.Instance.Device.Pressure();
 
         float destHeight = maxHeight * Mathf.Min((pressure / maxFizzyoPressure), 1);
         float y = transform.position.y + ((destHeight - transform.position.y) * smoothing);
@@ -47,7 +47,7 @@ public class Player : MonoBehaviour {
         }
         transform.position = new Vector3(x, y, transform.position.z);
 
-        if (FizzyoDevice.Instance().ButtonDown() || Input.GetKeyDown(KeyCode.Space))
+        if (Fizzyo.FizzyoFramework.Instance.Device.ButtonDown())
         {
             var pos = transform.position;
             pos.y += 0.5f;

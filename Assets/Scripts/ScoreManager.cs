@@ -7,6 +7,8 @@ public class ScoreManager : MonoBehaviour
 {
     public static ScoreManager Instance;
 
+    public bool GameStarted = false;
+
     public enum GameStage { SessionSetup, LevelPlaying, LevelEnd, GameEnd }
     public GameStage currentStage = GameStage.SessionSetup;
 
@@ -123,7 +125,7 @@ public class ScoreManager : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Fizzyo.FizzyoFramework.Instance.Device.ButtonDown())
         {
             ButtonPressed();
         }
@@ -175,6 +177,7 @@ public class ScoreManager : MonoBehaviour
                 SavePlayerPrefs();
                 CreateLevels();
                 StartNewLevel();
+                ScoreManager.Instance.GameStarted = true;
                 break;
 
             case GameStage.LevelPlaying:

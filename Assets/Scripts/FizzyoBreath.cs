@@ -1,13 +1,12 @@
-﻿using System.Collections;
+﻿using Fizzyo;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class FizzyoBreath : MonoBehaviour
 {
-    BreathRecogniser breathRecogniser;
-
-    public float FizzyoPressure;
     public float breathVolume;
 
     public Image OuterBar;
@@ -21,19 +20,23 @@ public class FizzyoBreath : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        breathRecogniser = new BreathRecogniser(maxPressure, maxBreathLength);
-        breathRecogniser.ExhalationComplete += BreathAnalyser_ExhalationComplete;
+        FizzyoFramework.Instance.Recogniser.MaxBreathLength = maxBreathLength;
+        FizzyoFramework.Instance.Recogniser.MaxPressure = maxPressure;
+        FizzyoFramework.Instance.Recogniser.BreathComplete += BreathAnalyser_ExhalationComplete;
     }
 
     private void BreathAnalyser_ExhalationComplete(object sender, ExhalationCompleteEventArgs e)
     {
-        if (e.IsBreathGood)
+        if (ScoreManager.Instance.GameStarted)
         {
-            ScoreManager.Instance.GoodBreathAnimation();
-        }
-        else
-        {
-            ScoreManager.Instance.BadBreathAnimation();
+            if (e.IsBreathFull)
+            {
+                ScoreManager.Instance.GoodBreathAnimation();
+            }
+            else
+            {
+                ScoreManager.Instance.BadBreathAnimation();
+            }
         }
     }
 
@@ -41,17 +44,23 @@ public class FizzyoBreath : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        breathRecogniser.AddSample(Time.deltaTime, FizzyoDevice.Instance().Pressure());
+        FizzyoFramework.Instance.Recogniser.AddSample(Time.deltaTime, FizzyoFramework.Instance.Device.Pressure());
 
-        FizzyoPressure = FizzyoDevice.Instance().Pressure();
-
-        breathVolume = breathRecogniser.ExhaledVolume;
+        breathVolume = FizzyoFramework.Instance.Recogniser.ExhaledVolume;
 
         // Set Visuals
-        OuterBarFill = breathRecogniser.Breathlength / breathRecogniser.MaxBreathLength;
+        OuterBarFill = FizzyoFramework.Instance.Recogniser.BreathLength / FizzyoFramework.Instance.Recogniser.MaxBreathLength;
         OuterBar.fillAmount = OuterBarFill;
 
         InnerBarFill = (float)ScoreManager.Instance.CurrentLevel.GoodBreathCount / (float)ScoreManager.Instance.CurrentLevel.GoodBreathMax;
         InnerBar.fillAmount = InnerBarFill;
+    }
+
+    private void OnDestroy()
+    {
+        if (FizzyoFramework.Instance.Recogniser != null)
+        {
+            FizzyoFramework.Instance.Recogniser.BreathComplete -= BreathAnalyser_ExhalationComplete;
+        }
     }
 }

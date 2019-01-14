@@ -25,7 +25,7 @@ public class PlayerBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (ScoreManager.Instance.currentStage == ScoreManager.GameStage.LevelPlaying && Input.GetKeyDown(KeyCode.Space))
+        if (ScoreManager.Instance.currentStage == ScoreManager.GameStage.LevelPlaying && Fizzyo.FizzyoFramework.Instance.Device.ButtonDown())
         {
             Jump();
         }
