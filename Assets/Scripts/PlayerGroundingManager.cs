@@ -5,11 +5,11 @@ using UnityEngine;
 public class PlayerGroundingManager : MonoBehaviour
 {
     public bool isGrounded = false;
-    private PlayerBehaviour player;
+    public PlayerBehaviour player;
 
     private void Start()
     {
-        player = this.GetComponentInParent<PlayerBehaviour>();
+        if(!player) player = this.GetComponentInParent<PlayerBehaviour>();
     }
 
     public void OnCollisionEnter2D(Collision2D collision)

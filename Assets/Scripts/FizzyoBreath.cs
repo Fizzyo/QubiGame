@@ -20,8 +20,8 @@ public class FizzyoBreath : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        FizzyoFramework.Instance.Recogniser.MaxBreathLength = maxBreathLength;
-        FizzyoFramework.Instance.Recogniser.MaxPressure = maxPressure;
+        //FizzyoFramework.Instance.Recogniser.MaxBreathLength = maxBreathLength;
+        //FizzyoFramework.Instance.Recogniser.MaxPressure = maxPressure;
         FizzyoFramework.Instance.Recogniser.BreathComplete += BreathAnalyser_ExhalationComplete;
     }
 

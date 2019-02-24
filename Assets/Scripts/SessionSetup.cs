@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class SessionSetup : MonoBehaviour
@@ -10,14 +8,20 @@ public class SessionSetup : MonoBehaviour
 
     private void Start()
     {
-        BreathDisplay.text = ScoreManager.Instance.SessionBreathCount.ToString();
-        SetsDisplay.text = ScoreManager.Instance.SessionSetCount.ToString();
+        if (ScoreManager.Instance.currentStage != ScoreManager.GameStage.Paused)
+        {
+            BreathDisplay.text = ScoreManager.Instance.SessionBreathCount.ToString();
+            SetsDisplay.text = ScoreManager.Instance.SessionSetCount.ToString();
+        }
     }
 
     private void Update()
     {
-        BreathDisplay.text = ScoreManager.Instance.SessionBreathCount.ToString();
-        SetsDisplay.text = ScoreManager.Instance.SessionSetCount.ToString();
+        if (ScoreManager.Instance.currentStage != ScoreManager.GameStage.Paused)
+        {
+            BreathDisplay.text = ScoreManager.Instance.SessionBreathCount.ToString();
+            SetsDisplay.text = ScoreManager.Instance.SessionSetCount.ToString();
+        }
     }
 
     public void IncrementBreathCount(int increment)
@@ -32,5 +36,19 @@ public class SessionSetup : MonoBehaviour
         ScoreManager.Instance.SessionSetCount += increment;
         ScoreManager.Instance.SessionSetCount = Mathf.Clamp(ScoreManager.Instance.SessionSetCount, 1, 90);
         SetsDisplay.text = ScoreManager.Instance.SessionSetCount.ToString();
+    }
+
+    public void ResumeGame()
+    {
+        ScoreManager.Instance.ResumeGame();
+    }
+
+    public void ExitGame()
+    {
+        Application.Quit();
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
     }
 }

@@ -164,15 +164,5 @@ namespace Fizzyo
             }
         }
 #endif
-
-        /// <summary>
-        /// Changes the maximum calibrated breath pressure and length to the specified values. Will set the Calibrated boolean to true.  
-        /// </summary>    
-        public void SetCalibrationLimits(float maxPressure = 1, float maxBreath = 1)
-        {
-            maxPressureCalibrated = maxPressure;
-            maxBreathCalibrated = maxBreath;
-            Calibrated = true;
-        }
     }
 }

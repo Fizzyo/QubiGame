@@ -4,7 +4,8 @@
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -12,6 +13,7 @@ MonoBehaviour:
   m_Name: FizzyoConfigurationProfile
   m_EditorClassIdentifier: 
   showLoginAutomatically: 1
+  requireLaunchFromHub: 1
   showSetGamerTagAutomatically: 0
   showCalibrateAutomatically: 1
   gameID: 5899eaf3-ba08-44cc-a1f5-fdd04da00722

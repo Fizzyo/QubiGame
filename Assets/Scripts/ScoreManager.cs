@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,8 +8,9 @@ public class ScoreManager : MonoBehaviour
 
     public bool GameStarted = false;
 
-    public enum GameStage { SessionSetup, LevelPlaying, LevelEnd, GameEnd }
+    public enum GameStage { SessionSetup, LevelPlaying, LevelEnd, GameEnd, Paused }
     public GameStage currentStage = GameStage.SessionSetup;
+    private GameStage pausedStage;
 
     // player prefs to load
     public int SessionBreathCount = 8;
@@ -27,11 +27,15 @@ public class ScoreManager : MonoBehaviour
     public GameObject LevelSetupUI;
     public GameObject LevelEndUI;
     public GameObject GameEndUI;
+    public GameObject PauseUI;
+    public GameObject LevelEndTimer;
+    public GameObject GameEndTimer;
 
     // In-Game objects
     public GameObject Player;
     public GameObject LevelEndPrefab;
     private GameObject levelEnd;
+    private Text TimerText;
 
     // Particle Effects
     public GameObject GoodBreathParticles;
@@ -60,6 +64,11 @@ public class ScoreManager : MonoBehaviour
     //In Game background music manager
     public BackgroundMusicManager backgroundMusicManager;
 
+    //Game attributes
+    private float pauseTimer = 0;
+    public float pauseTime = 5f;
+    private bool inputActive = false;
+
     // First thing to be called
     private void Awake()
     {
@@ -75,6 +84,7 @@ public class ScoreManager : MonoBehaviour
         HUD.SetActive(false);
         LevelEndUI.SetActive(false);
         GameEndUI.SetActive(false);
+        PauseUI.SetActive(false);
         StartCoroutine(AudioFader.FadeIn(BackgroundMenuMusic, 5f));
     }
 
@@ -115,8 +125,22 @@ public class ScoreManager : MonoBehaviour
     // Called once per frame
     private void Update()
     {
+        if (currentStage == GameStage.SessionSetup && Input.GetKey(KeyCode.Escape))
+        {
+            Application.Quit();
+
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#endif
+        }
+
         if (currentStage == GameStage.LevelPlaying)
         {
+            if (Input.GetKey(KeyCode.Escape))
+            {
+                PauseGame();
+            }
+
             CurrentLevel.LevelTime += Time.deltaTime;
 
             if (CurrentLevel.GoodBreathCount >= CurrentLevel.GoodBreathMax && levelEnd == null)
@@ -125,10 +149,26 @@ public class ScoreManager : MonoBehaviour
             }
         }
 
+        if (!inputActive && (currentStage == GameStage.LevelEnd || currentStage == GameStage.GameEnd))
+        {
+            GameStarted = false;
+            inputActive = CheckPause();
+            if (TimerText)
+            {
+                TimerText.gameObject.SetActive(true);
+                TimerText.text = (Mathf.Floor(pauseTime) - Mathf.Floor(pauseTimer)).ToString();
+            }
+        }
+        else if(TimerText)
+        {
+            TimerText.gameObject.SetActive(false);
+        }
+
         if (Fizzyo.FizzyoFramework.Instance.Device.ButtonDown())
         {
             ButtonPressed();
         }
+
     }
 
     #region Breaths
@@ -181,18 +221,37 @@ public class ScoreManager : MonoBehaviour
                 break;
 
             case GameStage.LevelPlaying:
-
                 break;
 
             case GameStage.LevelEnd:
-                IncrementLevel();
-                StartNewLevel();
+                if (inputActive)
+                {
+                    IncrementLevel();
+                    StartNewLevel();
+                    inputActive = false;
+                }
+
                 break;
 
             case GameStage.GameEnd:
-                NewSession();
+                if (inputActive)
+                {
+                    NewSession();
+                    inputActive = false;
+                }
                 break;
         }
+    }
+
+    private bool CheckPause()
+    {
+        pauseTimer += Time.deltaTime;
+        if (pauseTimer >= pauseTime)
+        {
+            pauseTimer = 0;
+            return true;
+        }
+        return false;
     }
 
     // Called when a coin is touched
@@ -242,6 +301,8 @@ public class ScoreManager : MonoBehaviour
     public void StartNewLevel()
     {
         currentStage = GameStage.LevelPlaying;
+        GameStarted = true;
+
 
         if (BackgroundMenuMusic.isPlaying)
         {
@@ -270,10 +331,14 @@ public class ScoreManager : MonoBehaviour
     {
         if (CurrentLevelIndex == Levels.Count - 1)
         {
+            TimerText = GameEndTimer.GetComponent<Text>();
+
             EndGame();
         }
         else
         {
+            TimerText = LevelEndTimer.GetComponent<Text>();
+
             currentStage = GameStage.LevelEnd;
 
             if (LevelEndEvent != null)
@@ -307,6 +372,28 @@ public class ScoreManager : MonoBehaviour
         GameEndSound.Play();
 
         backgroundMusicManager.StopBackgroundMusic();
+    }
+
+    public void PauseGame()
+    {
+        pausedStage = currentStage;
+        currentStage = GameStage.Paused;
+
+        HUD.SetActive(false);
+        PauseUI.SetActive(true);
+
+        backgroundMusicManager.StopBackgroundMusic();
+
+    }
+
+    public void ResumeGame()
+    {
+        currentStage = pausedStage;
+
+        HUD.SetActive(true);
+        PauseUI.SetActive(false);
+
+        backgroundMusicManager.StartBackgroundMusic();
     }
 
     public void CreateLevelEnd()
