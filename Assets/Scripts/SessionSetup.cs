@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Fizzyo;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class SessionSetup : MonoBehaviour
@@ -10,8 +11,8 @@ public class SessionSetup : MonoBehaviour
     {
         if (ScoreManager.Instance.currentStage != ScoreManager.GameStage.Paused)
         {
-            BreathDisplay.text = ScoreManager.Instance.SessionBreathCount.ToString();
-            SetsDisplay.text = ScoreManager.Instance.SessionSetCount.ToString();
+            BreathDisplay.text = FizzyoFramework.Instance.Session.SessionBreathCount.ToString();
+            SetsDisplay.text = FizzyoFramework.Instance.Session.SessionSetCount.ToString();
         }
     }
 
@@ -19,23 +20,23 @@ public class SessionSetup : MonoBehaviour
     {
         if (ScoreManager.Instance.currentStage != ScoreManager.GameStage.Paused)
         {
-            BreathDisplay.text = ScoreManager.Instance.SessionBreathCount.ToString();
-            SetsDisplay.text = ScoreManager.Instance.SessionSetCount.ToString();
+            BreathDisplay.text = FizzyoFramework.Instance.Session.SessionBreathCount.ToString();
+            SetsDisplay.text = FizzyoFramework.Instance.Session.SessionSetCount.ToString();
         }
     }
 
     public void IncrementBreathCount(int increment)
     {
-        ScoreManager.Instance.SessionBreathCount += increment;
-        ScoreManager.Instance.SessionBreathCount = Mathf.Clamp(ScoreManager.Instance.SessionBreathCount, 1, 90);
-        BreathDisplay.text = ScoreManager.Instance.SessionBreathCount.ToString();
+        FizzyoFramework.Instance.Session.SessionBreathCount += increment;
+        FizzyoFramework.Instance.Session.SessionBreathCount = Mathf.Clamp(FizzyoFramework.Instance.Session.SessionBreathCount, 1, 90);
+        BreathDisplay.text = FizzyoFramework.Instance.Session.SessionBreathCount.ToString();
     }
 
     public void IncrementSetCount(int increment)
     {
-        ScoreManager.Instance.SessionSetCount += increment;
-        ScoreManager.Instance.SessionSetCount = Mathf.Clamp(ScoreManager.Instance.SessionSetCount, 1, 90);
-        SetsDisplay.text = ScoreManager.Instance.SessionSetCount.ToString();
+        FizzyoFramework.Instance.Session.SessionSetCount += increment;
+        FizzyoFramework.Instance.Session.SessionSetCount = Mathf.Clamp(FizzyoFramework.Instance.Session.SessionSetCount, 1, 90);
+        SetsDisplay.text = FizzyoFramework.Instance.Session.SessionSetCount.ToString();
     }
 
     public void ResumeGame()

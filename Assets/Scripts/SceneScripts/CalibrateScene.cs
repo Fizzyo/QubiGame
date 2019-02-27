@@ -22,7 +22,8 @@ public class CalibrateScene : MonoBehaviour {
 
 
     // Use this for initialization
-    void Start () {
+    void Start ()
+    {
         //Hookup the breath recognizer
         FizzyoFramework.Instance.Recogniser.BreathStarted += OnBreathStarted;
         FizzyoFramework.Instance.Recogniser.BreathComplete += OnBreathEnded;

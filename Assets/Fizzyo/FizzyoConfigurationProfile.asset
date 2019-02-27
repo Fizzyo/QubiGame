@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: FizzyoConfigurationProfile
   m_EditorClassIdentifier: 
   showLoginAutomatically: 1
-  requireLaunchFromHub: 1
+  requireLaunchFromHub: 0
   showSetGamerTagAutomatically: 0
   showCalibrateAutomatically: 1
   gameID: 5899eaf3-ba08-44cc-a1f5-fdd04da00722
   gameSecret: JOyLkQWjnegkgnR08J32YjGewZ1p0GDX9w3Bk61YQdJzNZ4V0J0wpPydOGpJZn4W
-  apiPath: https://api.fizzyo-ucl.co.uk/
+  apiPath: https://api-staging.fizzyo-ucl.co.uk
   useTestHarnessData: 0
   testHarnessDataFile: 0

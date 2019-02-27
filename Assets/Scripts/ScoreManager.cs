@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Fizzyo;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,16 +9,20 @@ public class ScoreManager : MonoBehaviour
     public static ScoreManager Instance;
 
     public bool GameStarted = false;
+    public bool GameIsPaused = false;
+    public bool GameIsPausedByBreath = false;
+    public bool GamePausedDueToBreathingStop = false;
 
     public enum GameStage { SessionSetup, LevelPlaying, LevelEnd, GameEnd, Paused }
     public GameStage currentStage = GameStage.SessionSetup;
+
+
     private GameStage pausedStage;
 
     // player prefs to load
-    public int SessionBreathCount = 8;
-    public int SessionSetCount = 3;
     public int CoinHighScore = 0;
-
+    private string dateLastPlayed = string.Empty;
+    private int daysPlayed = 0;
     // Levels
     public int CurrentLevelIndex;
     public PlatformLevel CurrentLevel;
@@ -51,9 +57,10 @@ public class ScoreManager : MonoBehaviour
     public AudioSource BackgroundMenuMusic;
 
     // Save keys
-    private string sessionBreathCountKey = "BreathsCount";
-    private string sessionSetCountKey = "SetsCount";
     private string coinHighScoreKey = "coinHighScore";
+    private string dateLastPlayedKey = "dateLastPlayedKey";
+    private string daysPlayedKey = "daysPlayed";
+
 
     // Events
     public delegate void LevelResetEventHandler();
@@ -69,16 +76,21 @@ public class ScoreManager : MonoBehaviour
     public float pauseTime = 5f;
     private bool inputActive = false;
 
+    private GameAchievements[] Achievements;
+
     // First thing to be called
     private void Awake()
     {
         Instance = this;
+        Achievements = GetGameAchievements;
     }
 
     // Called at the start
     private void Start()
     {
-        LoadPlayerPrefs();
+        FizzyoFramework.Instance.Session.SessionPaused += Session_SessionPaused;
+        FizzyoFramework.Instance.Session.SessionResumed += Session_SessionResumed;
+        LoadPlayerHighScore();
 
         LevelSetupUI.SetActive(true);
         HUD.SetActive(false);
@@ -86,38 +98,93 @@ public class ScoreManager : MonoBehaviour
         GameEndUI.SetActive(false);
         PauseUI.SetActive(false);
         StartCoroutine(AudioFader.FadeIn(BackgroundMenuMusic, 5f));
+
+        CheckStartupAchievements();
+    }
+
+    private void CheckStartupAchievements()
+    {
+        long dateLastPlayedUTC = 0;
+        long.TryParse(dateLastPlayed, out dateLastPlayedUTC);
+        TimeSpan t = DateTime.Now - DateTime.FromFileTimeUtc(dateLastPlayedUTC);
+        var daysSinceLastPlayed = t.Days;
+        if (daysSinceLastPlayed > 0)
+        {
+            dateLastPlayed = DateTime.Now.ToFileTimeUtc().ToString();
+            daysPlayed += 1;
+        }
+        for (int i = 0; i < Achievements.Length; i++)
+        {
+            //See if the user has surpassed any achievement requirements
+            if (Achievements[i].DayRequirement > 0 && daysPlayed > Achievements[i].DayRequirement)
+            {
+               FizzyoFramework.Instance.Achievements.CheckAndUnlockAchivement(Achievements[i].AchievementName);
+            }
+        }
+    }
+
+
+    private void Session_SessionResumed(object sender, SessionEventArgs e)
+    {
+        GamePausedDueToBreathingStop = false;
+    }
+
+    private void Session_SessionPaused(object sender, SessionEventArgs e)
+    {
+        GamePausedDueToBreathingStop = true;
     }
 
     #region SaveLoad
     // Loads the player prefs
-    public void LoadPlayerPrefs()
+    public void LoadPlayerHighScore()
     {
-        if (PlayerPrefs.HasKey(sessionBreathCountKey))
-            SessionBreathCount = PlayerPrefs.GetInt(sessionBreathCountKey);
-
-        if (PlayerPrefs.HasKey(sessionSetCountKey))
-            SessionSetCount = PlayerPrefs.GetInt(sessionSetCountKey);
-
         if (PlayerPrefs.HasKey(coinHighScoreKey))
+        {
             CoinHighScore = PlayerPrefs.GetInt(coinHighScoreKey);
-    }
+        }
 
-    // Saves the player prefs
-    public void SavePlayerPrefs()
-    {
-        PlayerPrefs.SetInt(sessionBreathCountKey, SessionBreathCount);
-        PlayerPrefs.SetInt(sessionSetCountKey, SessionSetCount);
-        PlayerPrefs.Save();
+        if (PlayerPrefs.HasKey(dateLastPlayedKey))
+        {
+            dateLastPlayed = PlayerPrefs.GetString(dateLastPlayedKey);
+        }
+        else
+        {
+            //If there is no date retrieved, this is the first time.
+            FizzyoFramework.Instance.Achievements.CheckAndUnlockAchivement(Achievements[0].AchievementName);
+        }
+
+        if (PlayerPrefs.HasKey(daysPlayedKey))
+        {
+            daysPlayed = PlayerPrefs.GetInt(daysPlayedKey);
+        }
     }
 
     // If it's a new high score, save it
     public void CheckHighScore()
     {
+        //if this is our first day and we've completed the a session, give them a prize.
+        if (daysPlayed == 0)
+        {
+            FizzyoFramework.Instance.Achievements.CheckAndUnlockAchivement(Achievements[1].AchievementName);
+        }
+
+        PlayerPrefs.SetString(dateLastPlayedKey, dateLastPlayed);
+        PlayerPrefs.SetInt(daysPlayedKey, daysPlayed);
+
         if (TotalCoins() > CoinHighScore)
         {
             CoinHighScore = TotalCoins();
             PlayerPrefs.SetInt(coinHighScoreKey, CoinHighScore);
-            PlayerPrefs.Save();
+        }
+        PlayerPrefs.Save();
+
+        for (int i = 0; i < Achievements.Length; i++)
+        {
+            //See if the user has surpassed any achievement requirements
+            if (Achievements[i].ScoreRequirement > 0 && TotalCoins() > Achievements[i].ScoreRequirement)
+            {
+                FizzyoFramework.Instance.Achievements.CheckAndUnlockAchivement(Achievements[i].AchievementName);
+            }
         }
     }
     #endregion
@@ -141,6 +208,12 @@ public class ScoreManager : MonoBehaviour
                 PauseGame();
             }
 
+            if (GamePausedDueToBreathingStop)
+            {
+                GameIsPausedByBreath = true;
+                PauseGame();
+            }
+
             CurrentLevel.LevelTime += Time.deltaTime;
 
             if (CurrentLevel.GoodBreathCount >= CurrentLevel.GoodBreathMax && levelEnd == null)
@@ -159,7 +232,7 @@ public class ScoreManager : MonoBehaviour
                 TimerText.text = (Mathf.Floor(pauseTime) - Mathf.Floor(pauseTimer)).ToString();
             }
         }
-        else if(TimerText)
+        else if (TimerText)
         {
             TimerText.gameObject.SetActive(false);
         }
@@ -169,6 +242,10 @@ public class ScoreManager : MonoBehaviour
             ButtonPressed();
         }
 
+        if (GameIsPausedByBreath && !GamePausedDueToBreathingStop)
+        {
+            ResumeGame();
+        }
     }
 
     #region Breaths
@@ -214,7 +291,7 @@ public class ScoreManager : MonoBehaviour
         switch (currentStage)
         {
             case GameStage.SessionSetup:
-                SavePlayerPrefs();
+                FizzyoFramework.Instance.Session.StartSession(true);
                 CreateLevels();
                 StartNewLevel();
                 ScoreManager.Instance.GameStarted = true;
@@ -228,6 +305,7 @@ public class ScoreManager : MonoBehaviour
                 {
                     IncrementLevel();
                     StartNewLevel();
+                    FizzyoFramework.Instance.Session.StartSet();
                     inputActive = false;
                 }
 
@@ -279,10 +357,10 @@ public class ScoreManager : MonoBehaviour
         Levels = new List<PlatformLevel>();
         Levels.Clear();
 
-        for (int i = 0; i < SessionSetCount; i++)
+        for (int i = 0; i < FizzyoFramework.Instance.Session.SessionSetCount; i++)
         {
             PlatformLevel newLevel = new PlatformLevel();
-            newLevel.GoodBreathMax = SessionBreathCount;
+            newLevel.GoodBreathMax = FizzyoFramework.Instance.Session.SessionBreathCount;
             Levels.Add(newLevel);
         }
 
@@ -376,6 +454,7 @@ public class ScoreManager : MonoBehaviour
 
     public void PauseGame()
     {
+        GameIsPaused = true;
         pausedStage = currentStage;
         currentStage = GameStage.Paused;
 
@@ -388,6 +467,10 @@ public class ScoreManager : MonoBehaviour
 
     public void ResumeGame()
     {
+        GameIsPaused = false;
+        GameIsPausedByBreath = false;
+        FizzyoFramework.Instance.Session.ResumeSession();
+
         currentStage = pausedStage;
 
         HUD.SetActive(true);
@@ -450,6 +533,21 @@ public class ScoreManager : MonoBehaviour
 
         return newCount;
     }
+
+    private GameAchievements[] GetGameAchievements => new[]
+    {
+        new GameAchievements("Welcome to the Party","Started your first game"),
+        new GameAchievements("First Rodeo", "Completed your first session"),
+        new GameAchievements("Qubed", "You've been cubed/nCollected 27 coins - 3 x 3 x 3", 27),
+        new GameAchievements("Qube Squared","Double that cube/nCollected 216 coins 6 x 6 x 6", 216),
+        new GameAchievements("Qube Decade","Did you see that bird fly/nCollected 1000 coins 10 x 10 x 10", 1000),
+        new GameAchievements("Sweet Qube","Coming of age/nCollected 4096 coins 16 x 16 x 16", 4096),
+        new GameAchievements("Driving Qube","Learning to Drive?/nCollected 4913 coins 17 x 17 x 17", 4913),
+        new GameAchievements("Prime Qube","Two primes make a whole?/nCollected 9261 coins (3x3x3) × (7x7x7)", 9261),
+        new GameAchievements("Century Qube","Turn of the century/nCollected 1000000000 coins 100 x 100 x 100", 1000000000),
+        new GameAchievements("Qubi Streak","7 day streak! Play qubi at least once a day for a week", 0, 7),
+        new GameAchievements("Qubi Mega Streak","28 day streak! Play qubi at least once a day for 4 weeks", 0, 28)
+    };
 }
 
 [System.Serializable]
@@ -470,5 +568,21 @@ public class PlatformLevel
     public PlatformLevel()
     {
 
+    }
+}
+
+public struct GameAchievements
+{
+    public string AchievementName;
+    public string AchievementTag;
+    public int ScoreRequirement;
+    public int DayRequirement;
+
+    public GameAchievements(string Name, string Tag, int Score = 0, int Days = 0)
+    {
+        AchievementName = Name;
+        AchievementTag = Tag;
+        ScoreRequirement = Score;
+        DayRequirement = Days;
     }
 }

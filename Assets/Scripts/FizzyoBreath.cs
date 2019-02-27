@@ -44,7 +44,7 @@ public class FizzyoBreath : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        FizzyoFramework.Instance.Recogniser.AddSample(Time.deltaTime, FizzyoFramework.Instance.Device.Pressure());
+        //FizzyoFramework.Instance.Recogniser.AddSample(Time.deltaTime, FizzyoFramework.Instance.Device.Pressure());
 
         breathVolume = FizzyoFramework.Instance.Recogniser.ExhaledVolume;
 
@@ -58,7 +58,7 @@ public class FizzyoBreath : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (FizzyoFramework.Instance.Recogniser != null)
+        if (FizzyoFramework.Instance != null && FizzyoFramework.Instance.Recogniser != null)
         {
             FizzyoFramework.Instance.Recogniser.BreathComplete -= BreathAnalyser_ExhalationComplete;
         }

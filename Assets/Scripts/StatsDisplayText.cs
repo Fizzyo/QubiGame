@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Fizzyo;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -70,11 +71,11 @@ public class StatsDisplayText : MonoBehaviour
                 break;
 
             case GameStats.SessionBreathCount:
-                stringToDisplay = ScoreManager.Instance.SessionBreathCount.ToString() + Suffix;
+                stringToDisplay = FizzyoFramework.Instance.Session.SessionBreathCount.ToString() + Suffix;
                 break;
 
             case GameStats.SessionSetCount:
-                stringToDisplay = ScoreManager.Instance.SessionSetCount.ToString() + Suffix;
+                stringToDisplay = FizzyoFramework.Instance.Session.SessionSetCount.ToString() + Suffix;
                 break;
 
             case GameStats.GoodBreathCountCurrentLevel:

@@ -576,7 +576,7 @@ PlayerSettings:
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: FizzyoBasicExample
-  metroPackageVersion: 1.2.0.0
+  metroPackageVersion: 1.3.0.0
   metroCertificatePath: Assets\WSATestCertificate.pfx
   metroCertificatePassword: 
   metroCertificateSubject: DefaultCompany
@@ -637,7 +637,7 @@ PlayerSettings:
       VoipCall: False
       WebCam: False
   metroTargetDeviceFamilies:
-    Desktop: False
+    Desktop: True
     Holographic: False
     IoT: False
     IoTHeadless: False
@@ -646,7 +646,7 @@ PlayerSettings:
     Xbox: False
   metroFTAName: 
   metroFTAFileTypes: []
-  metroProtocolName: 
+  metroProtocolName: fizzyoqubi
   metroCompilationOverrides: 1
   XboxOneProductId: 
   XboxOneUpdateKey: 
