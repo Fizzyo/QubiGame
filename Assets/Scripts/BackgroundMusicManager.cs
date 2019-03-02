@@ -10,7 +10,6 @@ public class BackgroundMusicManager : MonoBehaviour {
     private int selectedCollection;
     private int currentLevel = 0;
 
-
     	// Use this for initialization
 	void Awake () {
         if (collection == null || collection.Length < 1)

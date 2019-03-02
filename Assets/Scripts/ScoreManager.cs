@@ -11,7 +11,9 @@ public class ScoreManager : MonoBehaviour
     public bool GameStarted = false;
     public bool GameIsPaused = false;
     public bool GameIsPausedByBreath = false;
-    public bool GamePausedDueToBreathingStop = false;
+    private bool GamePausedDueToBreathingStop = false;
+    private bool firstRun = false;
+    public AchievementAnimation achievementAnimation;
 
     public enum GameStage { SessionSetup, LevelPlaying, LevelEnd, GameEnd, Paused }
     public GameStage currentStage = GameStage.SessionSetup;
@@ -88,6 +90,9 @@ public class ScoreManager : MonoBehaviour
     // Called at the start
     private void Start()
     {
+        //first start test
+        PlayerPrefs.DeleteAll();
+
         FizzyoFramework.Instance.Session.SessionPaused += Session_SessionPaused;
         FizzyoFramework.Instance.Session.SessionResumed += Session_SessionResumed;
         LoadPlayerHighScore();
@@ -113,16 +118,7 @@ public class ScoreManager : MonoBehaviour
             dateLastPlayed = DateTime.Now.ToFileTimeUtc().ToString();
             daysPlayed += 1;
         }
-        for (int i = 0; i < Achievements.Length; i++)
-        {
-            //See if the user has surpassed any achievement requirements
-            if (Achievements[i].DayRequirement > 0 && daysPlayed > Achievements[i].DayRequirement)
-            {
-               FizzyoFramework.Instance.Achievements.CheckAndUnlockAchivement(Achievements[i].AchievementName);
-            }
-        }
     }
-
 
     private void Session_SessionResumed(object sender, SessionEventArgs e)
     {
@@ -149,8 +145,7 @@ public class ScoreManager : MonoBehaviour
         }
         else
         {
-            //If there is no date retrieved, this is the first time.
-            FizzyoFramework.Instance.Achievements.CheckAndUnlockAchivement(Achievements[0].AchievementName);
+            firstRun = true;
         }
 
         if (PlayerPrefs.HasKey(daysPlayedKey))
@@ -160,12 +155,16 @@ public class ScoreManager : MonoBehaviour
     }
 
     // If it's a new high score, save it
-    public void CheckHighScore()
+    public void CheckHighScore(bool GameEnd = false)
     {
         //if this is our first day and we've completed the a session, give them a prize.
-        if (daysPlayed == 0)
+        if (GameEnd && daysPlayed == 1)
         {
-            FizzyoFramework.Instance.Achievements.CheckAndUnlockAchivement(Achievements[1].AchievementName);
+            var result = FizzyoFramework.Instance.Achievements.CheckAndUnlockAchievement(Achievements[1].AchievementName);
+            if (result == FizzyoRequestReturnType.SUCCESS)
+            {
+                achievementAnimation.UnlockAchievmentUI(Achievements[1].AchievementName, Achievements[1].AchievementTag);
+            }
         }
 
         PlayerPrefs.SetString(dateLastPlayedKey, dateLastPlayed);
@@ -183,7 +182,11 @@ public class ScoreManager : MonoBehaviour
             //See if the user has surpassed any achievement requirements
             if (Achievements[i].ScoreRequirement > 0 && TotalCoins() > Achievements[i].ScoreRequirement)
             {
-                FizzyoFramework.Instance.Achievements.CheckAndUnlockAchivement(Achievements[i].AchievementName);
+                var result = FizzyoFramework.Instance.Achievements.CheckAndUnlockAchievement(Achievements[i].AchievementName);
+                if (result == FizzyoRequestReturnType.SUCCESS)
+                {
+                    achievementAnimation.UnlockAchievmentUI(Achievements[i].AchievementName, Achievements[i].AchievementTag);
+                }
             }
         }
     }
@@ -378,6 +381,28 @@ public class ScoreManager : MonoBehaviour
     // Begin playing the current Level
     public void StartNewLevel()
     {
+        if (firstRun)
+        {
+            //If there is no date retrieved, this is the first time.
+            var result = FizzyoFramework.Instance.Achievements.CheckAndUnlockAchievement(Achievements[0].AchievementName);
+            if (result == FizzyoRequestReturnType.SUCCESS)
+            {
+                achievementAnimation.UnlockAchievmentUI(Achievements[0].AchievementName, Achievements[0].AchievementTag);
+            }
+            firstRun = false;
+        }
+        else
+        {
+            //Check if the user has been playing long enough for some acievements
+            for (int i = 0; i < Achievements.Length; i++)
+            {
+                if (Achievements[i].DayRequirement > 0 && daysPlayed > Achievements[i].DayRequirement)
+                {
+                    FizzyoFramework.Instance.Achievements.CheckAndUnlockAchievement(Achievements[i].AchievementName);
+                }
+            }
+        }
+
         currentStage = GameStage.LevelPlaying;
         GameStarted = true;
 
@@ -436,7 +461,7 @@ public class ScoreManager : MonoBehaviour
     {
         currentStage = GameStage.GameEnd;
 
-        CheckHighScore();
+        CheckHighScore(true);
 
         if (GameEndEvent != null)
             GameEndEvent();
@@ -536,7 +561,7 @@ public class ScoreManager : MonoBehaviour
 
     private GameAchievements[] GetGameAchievements => new[]
     {
-        new GameAchievements("Welcome to the Party","Started your first game"),
+        new GameAchievements("Welcome to the Party","Started your first game", 0, 1),
         new GameAchievements("First Rodeo", "Completed your first session"),
         new GameAchievements("Qubed", "You've been cubed/nCollected 27 coins - 3 x 3 x 3", 27),
         new GameAchievements("Qube Squared","Double that cube/nCollected 216 coins 6 x 6 x 6", 216),

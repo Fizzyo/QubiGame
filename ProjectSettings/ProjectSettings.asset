@@ -563,7 +563,7 @@ PlayerSettings:
   scriptingDefineSymbols: {}
   platformArchitecture: {}
   scriptingBackend:
-    Metro: 1
+    Metro: 2
     Standalone: 0
     WebPlayer: 0
   il2cppCompilerConfiguration: {}

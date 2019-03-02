@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FizzyoConfigurationProfile
   m_EditorClassIdentifier: 
   showLoginAutomatically: 1
-  requireLaunchFromHub: 0
+  requireLaunchFromHub: 1
   showSetGamerTagAutomatically: 0
   showCalibrateAutomatically: 1
   gameID: 5899eaf3-ba08-44cc-a1f5-fdd04da00722

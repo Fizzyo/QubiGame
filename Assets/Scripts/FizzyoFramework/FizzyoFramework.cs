@@ -160,13 +160,13 @@ namespace Fizzyo
 
             if (arguments.ContainsKey("accessToken") && arguments.ContainsKey("userId"))
             {
-                User.Login(arguments["userId"], arguments["accessToken"]);
+                FizzyoFramework.Instance.User.SetLoginCredentials(arguments["userId"], arguments["accessToken"]);
             }
             else
             {
                 if (FizzyoFramework.Instance.FizzyoConfigurationProfile.RequireLaunchFromHub)
                 {
-                    //Debug.LogError("Launch Arguments -[" + launchArguments +"]");
+                    Debug.LogError("Launch Arguments -[" + launchArguments +"]");
                     SceneManager.LoadScene("Error");
                     return;
                 }
@@ -271,10 +271,15 @@ namespace Fizzyo
         /// </returns>
         public bool Load()
         {
-            //Login to server
-            if (FizzyoConfigurationProfile != null && FizzyoConfigurationProfile.ShowLoginAutomatically && User!= null && !User.LoggedIn)
+            if (FizzyoConfigurationProfile == null)
             {
-                FizzyoNetworking.loginResult = User.Login();
+                PlayOffline();
+                return false;
+            }
+            //Login to server
+            if (FizzyoConfigurationProfile.ShowLoginAutomatically && FizzyoFramework.Instance.User != null && !FizzyoFramework.Instance.User.LoggedIn)
+            {
+                FizzyoNetworking.loginResult = FizzyoFramework.Instance.User.Login();
 
                 if (FizzyoNetworking.loginResult != LoginReturnType.SUCCESS)
                 {
@@ -282,14 +287,9 @@ namespace Fizzyo
                     return false;
                 }
             }
-            else
-            {
-                PlayOffline();
-                return false;
-            }
 
-            User.Load();
-            Achievements.Load();
+            FizzyoFramework.Instance.User.Load();
+            FizzyoFramework.Instance.Achievements.Load();
 
             return true;
         }

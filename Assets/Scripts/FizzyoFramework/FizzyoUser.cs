@@ -15,7 +15,6 @@ using Windows.Data.Json;
 using System.Net.Http;
 using System.Threading.Tasks;
 #endif
-using System.Web;
 
 
 namespace Fizzyo
@@ -73,7 +72,7 @@ namespace Fizzyo
         /// <summary>
         /// Testing variables, by default, username should be : test-patient
         /// </summary>
-        public string testUsername = "test-patient";
+        public string testUsername = "Fizzyo Test Patient2";
         /// <summary>
         /// Testing variables, by default, password should be : FizzyoTesting2017
         /// </summary>
@@ -114,7 +113,6 @@ namespace Fizzyo
 
 #if !UNITY_EDITOR
         private bool loginInProgress = false;
-        private LoginReturnType loginResult = LoginReturnType.FAILED_TO_CONNECT;
 #endif
 
         /// <summary>
@@ -133,21 +131,20 @@ namespace Fizzyo
             }, true);
 
             while(loginInProgress){}
-            return loginResult;
+            return FizzyoNetworking.loginResult;
 
 #elif UNITY_EDITOR
             return PostAuthentication(testUsername, testPassword);
 #else
-            return loginResult;
+            return FizzyoNetworking.loginResult;
 
 #endif
         }
 
-        public void Login(string userId,string accessToken)
+        public void SetLoginCredentials(string userId,string accessToken)
         {
             UserID = userId;
             AccessToken = accessToken;
-            LoggedIn = true;
         }
 
         /// <summary>
@@ -183,7 +180,7 @@ namespace Fizzyo
             AllUserData allData = JsonUtility.FromJson<AllUserData>(webRequest.downloadHandler.text);
             UserID = allData.user.id;
             AccessToken = allData.accessToken;
-
+            LoggedIn = true;
             return LoginReturnType.SUCCESS;
         }
 
@@ -219,19 +216,20 @@ namespace Fizzyo
 
                 if (tokenExhanged == true)
                 {
-                       loginResult =  LoginReturnType.SUCCESS;
-                        loginInProgress = false;
-                        return;
+                    FizzyoNetworking.loginResult = LoginReturnType.SUCCESS;
+                    LoggedIn = true;
+                    loginInProgress = false;
+                    return;
                 }
                 else
                 {
-                    loginResult =  LoginReturnType.INCORRECT;
+                    FizzyoNetworking.loginResult = LoginReturnType.INCORRECT;
                     loginInProgress = false;
                     return;
                 }
             }
 
-            loginResult =  LoginReturnType.FAILED_TO_CONNECT;
+            FizzyoNetworking.loginResult = LoginReturnType.FAILED_TO_CONNECT;
             loginInProgress = false;
             return;
         }
@@ -285,7 +283,7 @@ namespace Fizzyo
                 //accessToken = tokens.GetNamedString("accessToken");
                 UserID = userID;
                 AccessToken = token;
-                loggedIn = true;
+                LoggedIn = true;
                 return true;
             }
         }
