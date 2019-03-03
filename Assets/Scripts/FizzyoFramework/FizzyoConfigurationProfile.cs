@@ -13,21 +13,22 @@ namespace Fizzyo
         [Header("Script Behaviour")]
         [Tooltip("Automatically show login screen at start of game.")]
         [SerializeField]
-        private bool showLoginAutomatically = true;
+        private bool loginFromDesktop = true;
 
         /// <summary>
-        /// Show the Logon screen automatically when the application is launched
+        /// Show the Logon screen automatically when the application is launched from the desktop
         /// </summary>
-        public bool ShowLoginAutomatically
+        /// <remarks>Not to be used for a HUB deployment</remarks>
+        public bool LoginFromDesktop
         {
             get
             {
-                return showLoginAutomatically;
+                return loginFromDesktop;
             }
 
             set
             {
-                showLoginAutomatically = value;
+                loginFromDesktop = value;
             }
         }
 
