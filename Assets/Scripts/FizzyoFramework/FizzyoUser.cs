@@ -145,6 +145,7 @@ namespace Fizzyo
         {
             UserID = userId;
             AccessToken = accessToken;
+            FizzyoNetworking.loginResult = LoginReturnType.SUCCESS;
         }
 
         /// <summary>
