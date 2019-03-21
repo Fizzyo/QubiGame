@@ -24,9 +24,6 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu.unity
     guid: 7a70f6dd10e4393489b683c9293d236b
   - enabled: 1
-    path: Assets/Scenes/StartCalibrate.unity
-    guid: 5c9a2e690b9fd514e93a6ba6487e63a3
-  - enabled: 1
     path: Assets/Fizzyo/FizzyoFramework/Scenes/Error.unity
     guid: 7eafea4134de84c40a08aac94ee20d31
   m_configObjects: {}

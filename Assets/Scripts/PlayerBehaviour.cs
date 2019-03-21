@@ -64,7 +64,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     public void Land()
     {
-        if (thisRigidbody.velocity.y < .2f)
+        if (thisRigidbody.velocity.y < .5f)
         {
             availableJumpCount = maxJumpCount;
         }

@@ -136,11 +136,15 @@ namespace Fizzyo
             return PostAuthentication(testUsername, testPassword);
 #else
             return FizzyoNetworking.loginResult;
-
 #endif
         }
 
-        public void LoginUsingHUb(string userId,string accessToken)
+        /// <summary>
+        /// Login using the pre-authenticated Hub session using it's credentials for all networking calls
+        /// </summary>
+        /// <param name="userId">User ID passed from the HUb login session</param>
+        /// <param name="accessToken">MSAL access token passed from the hub login session</param>
+        public void LoginUsingHub(string userId,string accessToken)
         {
             UserID = userId;
             AccessToken = accessToken;

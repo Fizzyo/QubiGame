@@ -22,4 +22,10 @@ public class PlayerGroundingManager : MonoBehaviour
     {
         isGrounded = false;
     }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        isGrounded = true;
+        player.Land();
+    }
 }

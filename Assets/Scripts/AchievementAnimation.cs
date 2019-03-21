@@ -8,6 +8,9 @@ public class AchievementAnimation : MonoBehaviour
     private Animator anim;
     public Text achievementName;
     public Text achievementDescription;
+    public ParticleSystem achievementParticles;
+    public AudioSource achievementSound;
+
 
     void Start()
     {
@@ -21,4 +24,26 @@ public class AchievementAnimation : MonoBehaviour
         achievementDescription.text = Description;
         anim.SetTrigger("Start");
     }
+
+#if UNITY_EDITOR
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            UnlockAchievmentUI("This is a test", "TestingTesting\n1 + 2 = 3");
+        }
+    }
+#endif
+
+    public void ActivateParticles()
+    {
+        achievementParticles.Play();
+    }
+
+    public void PlayAchievementSound()
+    {
+        achievementSound.Stop();
+        achievementSound.Play();
+    }
+
 }

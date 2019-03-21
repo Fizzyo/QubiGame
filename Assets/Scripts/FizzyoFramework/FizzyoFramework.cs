@@ -161,7 +161,7 @@ namespace Fizzyo
             if (arguments.ContainsKey("accessToken") && arguments.ContainsKey("userId"))
             {
                 //Login using the Hubs pre-authenticated credentials
-                FizzyoFramework.Instance.User.LoginUsingHUb(arguments["userId"], arguments["accessToken"]);
+                FizzyoFramework.Instance.User.LoginUsingHub(arguments["userId"], arguments["accessToken"]);
             }
             else
             {
