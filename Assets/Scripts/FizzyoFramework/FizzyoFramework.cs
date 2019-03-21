@@ -160,7 +160,8 @@ namespace Fizzyo
 
             if (arguments.ContainsKey("accessToken") && arguments.ContainsKey("userId"))
             {
-                FizzyoFramework.Instance.User.SetLoginCredentials(arguments["userId"], arguments["accessToken"]);
+                //Login using the Hubs pre-authenticated credentials
+                FizzyoFramework.Instance.User.LoginUsingHub(arguments["userId"], arguments["accessToken"]);
             }
             else
             {
@@ -276,10 +277,11 @@ namespace Fizzyo
                 PlayOffline();
                 return false;
             }
-            //Login to server
-            if (FizzyoConfigurationProfile.ShowLoginAutomatically && FizzyoFramework.Instance.User != null && !FizzyoFramework.Instance.User.LoggedIn)
+
+            //Login to server directly without the hub
+            if (FizzyoConfigurationProfile.LoginFromDesktop && FizzyoFramework.Instance.User != null && !FizzyoFramework.Instance.User.LoggedIn)
             {
-                FizzyoNetworking.loginResult = FizzyoFramework.Instance.User.Login();
+                FizzyoNetworking.loginResult = FizzyoFramework.Instance.User.LoginMSA(FizzyoConfigurationProfile.GameID, FizzyoConfigurationProfile.ApiPath);
 
                 if (FizzyoNetworking.loginResult != LoginReturnType.SUCCESS)
                 {

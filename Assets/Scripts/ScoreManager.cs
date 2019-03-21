@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class ScoreManager : MonoBehaviour
@@ -90,9 +91,6 @@ public class ScoreManager : MonoBehaviour
     // Called at the start
     private void Start()
     {
-        //first start test
-        PlayerPrefs.DeleteAll();
-
         FizzyoFramework.Instance.Session.SessionPaused += Session_SessionPaused;
         FizzyoFramework.Instance.Session.SessionResumed += Session_SessionResumed;
         LoadPlayerHighScore();
@@ -188,6 +186,19 @@ public class ScoreManager : MonoBehaviour
                     achievementAnimation.UnlockAchievmentUI(Achievements[i].AchievementName, Achievements[i].AchievementTag);
                 }
             }
+        }
+        if (ScoreManager.Instance.TotalBadBreathCount() == 0)
+        {
+            var result = FizzyoFramework.Instance.Achievements.CheckAndUnlockAchievement(Achievements[2].AchievementName);
+            if (result == FizzyoRequestReturnType.SUCCESS)
+            {
+                achievementAnimation.UnlockAchievmentUI(Achievements[2].AchievementName, Achievements[2].AchievementTag);
+            }
+        }
+
+        if (GameEnd)
+        {
+            FizzyoFramework.Instance.Achievements.PostScore(TotalCoins());
         }
     }
     #endregion
@@ -393,12 +404,16 @@ public class ScoreManager : MonoBehaviour
         }
         else
         {
-            //Check if the user has been playing long enough for some acievements
+            //Check if the user has been playing long enough for some achievements
             for (int i = 0; i < Achievements.Length; i++)
             {
                 if (Achievements[i].DayRequirement > 0 && daysPlayed > Achievements[i].DayRequirement)
                 {
-                    FizzyoFramework.Instance.Achievements.CheckAndUnlockAchievement(Achievements[i].AchievementName);
+                    var result = FizzyoFramework.Instance.Achievements.CheckAndUnlockAchievement(Achievements[i].AchievementName);
+                    if (result == FizzyoRequestReturnType.SUCCESS)
+                    {
+                        achievementAnimation.UnlockAchievmentUI(Achievements[i].AchievementName, Achievements[i].AchievementTag);
+                    }
                 }
             }
         }
@@ -486,6 +501,8 @@ public class ScoreManager : MonoBehaviour
         HUD.SetActive(false);
         PauseUI.SetActive(true);
 
+        EventSystem.current.SetSelectedGameObject(null);
+
         backgroundMusicManager.StopBackgroundMusic();
 
     }
@@ -563,13 +580,14 @@ public class ScoreManager : MonoBehaviour
     {
         new GameAchievements("Welcome to the Party","Started your first game", 0, 1),
         new GameAchievements("First Rodeo", "Completed your first session"),
-        new GameAchievements("Qubed", "You've been cubed/nCollected 27 coins - 3 x 3 x 3", 27),
-        new GameAchievements("Qube Squared","Double that cube/nCollected 216 coins 6 x 6 x 6", 216),
-        new GameAchievements("Qube Decade","Did you see that bird fly/nCollected 1000 coins 10 x 10 x 10", 1000),
-        new GameAchievements("Sweet Qube","Coming of age/nCollected 4096 coins 16 x 16 x 16", 4096),
-        new GameAchievements("Driving Qube","Learning to Drive?/nCollected 4913 coins 17 x 17 x 17", 4913),
-        new GameAchievements("Prime Qube","Two primes make a whole?/nCollected 9261 coins (3x3x3) × (7x7x7)", 9261),
-        new GameAchievements("Century Qube","Turn of the century/nCollected 1000000000 coins 100 x 100 x 100", 1000000000),
+        new GameAchievements("Superstar!","Perfection\nCompleted a session with no bad breaths"),
+        new GameAchievements("Qubed", "You've been cubed\nCollected 27 coins - 3 x 3 x 3", 27),
+        new GameAchievements("Qube Squared","Double that cube\nCollected 216 coins 6 x 6 x 6", 216),
+        new GameAchievements("Qube Decade","Did you see that bird fly\nCollected 1000 coins 10 x 10 x 10", 1000),
+        new GameAchievements("Sweet Qube","Coming of age\nCollected 4096 coins 16 x 16 x 16", 4096),
+        new GameAchievements("Driving Qube","Learning to Drive?\nCollected 4913 coins 17 x 17 x 17", 4913),
+        new GameAchievements("Prime Qube","Two primes make a whole?\nCollected 9261 coins (3x3x3) × (7x7x7)", 9261),
+        new GameAchievements("Century Qube","Turn of the century\nCollected 1000000000 coins 100 x 100 x 100", 1000000000),
         new GameAchievements("Qubi Streak","7 day streak! Play qubi at least once a day for a week", 0, 7),
         new GameAchievements("Qubi Mega Streak","28 day streak! Play qubi at least once a day for 4 weeks", 0, 28)
     };

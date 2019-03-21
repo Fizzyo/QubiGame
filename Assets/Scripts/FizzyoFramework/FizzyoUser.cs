@@ -117,17 +117,16 @@ namespace Fizzyo
 
         /// <summary>
         /// Method that begins the login process.
+        /// Only used when logging in without the hub.
         /// </summary>
-        public LoginReturnType Login()
+        public LoginReturnType LoginMSA(string GameID, string ApiPath)
         {
-
 #if UNITY_UWP
-            loginInProgress = true;
 
              UnityEngine.WSA.Application.InvokeOnUIThread(
             async () =>
             {
-                LoginAsync();
+                LoginAsync(GameID, ApiPath);
             }, true);
 
             while(loginInProgress){}
@@ -137,14 +136,19 @@ namespace Fizzyo
             return PostAuthentication(testUsername, testPassword);
 #else
             return FizzyoNetworking.loginResult;
-
 #endif
         }
 
-        public void SetLoginCredentials(string userId,string accessToken)
+        /// <summary>
+        /// Login using the pre-authenticated Hub session using it's credentials for all networking calls
+        /// </summary>
+        /// <param name="userId">User ID passed from the HUb login session</param>
+        /// <param name="accessToken">MSAL access token passed from the hub login session</param>
+        public void LoginUsingHub(string userId,string accessToken)
         {
             UserID = userId;
             AccessToken = accessToken;
+            LoggedIn = true;
             FizzyoNetworking.loginResult = LoginReturnType.SUCCESS;
         }
 
@@ -187,14 +191,15 @@ namespace Fizzyo
 
 #if UNITY_UWP
 
-        public async Task LoginAsync()
+        public async Task LoginAsync(string GameID, string ApiPath)
         {
+            const string clientID = "65973b85-c34f-41a8-a4ad-00529d1fc23c"; 
+            
             string authorizationRequest = String.Format("{0}?client_id={1}&scope={2}&response_type=code&redirect_uri={3}",
                 authorizationEndpoint,
-                FizzyoFramework.Instance.FizzyoConfigurationProfile.GameID,
-                //state,
+                clientID,
                 scopes,
-                System.Uri.EscapeDataString(FizzyoFramework.Instance.FizzyoConfigurationProfile.ApiPath + "auth-example"));
+                System.Uri.EscapeDataString(ApiPath + "auth-example"));
 
             Uri StartUri = new Uri(authorizationRequest);
             Uri EndUri = new Uri(FizzyoFramework.Instance.FizzyoConfigurationProfile.ApiPath + "auth-example");
