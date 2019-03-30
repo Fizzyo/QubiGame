@@ -20,4 +20,4 @@ MonoBehaviour:
   useTestHarnessData: 0
   testHarnessDataFile: 0
   loginFromDesktop: 0
-  requireLaunchFromHub: 0
+  requireLaunchFromHub: 1

@@ -72,7 +72,7 @@ namespace Fizzyo
         /// <summary>
         /// Testing variables, by default, username should be : test-patient
         /// </summary>
-        public string testUsername = "Fizzyo Test Patient2";
+        public string testUsername = "test-patient";
         /// <summary>
         /// Testing variables, by default, password should be : FizzyoTesting2017
         /// </summary>

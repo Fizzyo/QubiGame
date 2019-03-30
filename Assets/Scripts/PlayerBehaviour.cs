@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour
 {
@@ -9,6 +7,7 @@ public class PlayerBehaviour : MonoBehaviour
     public float Gravity = 9.8f;
     private float maxJumpCount = 2;
     private float availableJumpCount = 2;
+    private bool badBreath = false;
 
     private Rigidbody2D thisRigidbody;
 
@@ -62,11 +61,26 @@ public class PlayerBehaviour : MonoBehaviour
         }
     }
 
+    public void ReduceJumpCount()
+    {
+        badBreath = true;
+        if (availableJumpCount > 0)
+        {
+            availableJumpCount--;
+        }
+    }
+
+    public void ResetJumpCount()
+    {
+        badBreath = false;
+        availableJumpCount = maxJumpCount;
+    }
+
     public void Land()
     {
-        if (thisRigidbody.velocity.y < .5f)
+        if (!badBreath && thisRigidbody.velocity.y < .5f)
         {
-            availableJumpCount = maxJumpCount;
+            ResetJumpCount();
         }
     }
 }

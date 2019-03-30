@@ -15,6 +15,7 @@ public class ScoreManager : MonoBehaviour
     private bool GamePausedDueToBreathingStop = false;
     private bool firstRun = false;
     public AchievementAnimation achievementAnimation;
+    //public PlayerBehaviour Player;
 
     public enum GameStage { SessionSetup, LevelPlaying, LevelEnd, GameEnd, Paused }
     public GameStage currentStage = GameStage.SessionSetup;
@@ -42,6 +43,7 @@ public class ScoreManager : MonoBehaviour
 
     // In-Game objects
     public GameObject Player;
+    private PlayerBehaviour playerBehaviour;
     public GameObject LevelEndPrefab;
     private GameObject levelEnd;
     private Text TimerText;
@@ -100,6 +102,9 @@ public class ScoreManager : MonoBehaviour
         LevelEndUI.SetActive(false);
         GameEndUI.SetActive(false);
         PauseUI.SetActive(false);
+
+        playerBehaviour = Player.GetComponent<PlayerBehaviour>();
+
         StartCoroutine(AudioFader.FadeIn(BackgroundMenuMusic, 5f));
 
         CheckStartupAchievements();
@@ -266,6 +271,8 @@ public class ScoreManager : MonoBehaviour
 
     public void GoodBreathAnimation()
     {
+        playerBehaviour.ResetJumpCount();
+
         GoodBreathSound.Stop();
         GoodBreathSound.Play();
 
@@ -284,6 +291,8 @@ public class ScoreManager : MonoBehaviour
 
     public void BadBreathAnimation()
     {
+        playerBehaviour.ReduceJumpCount();
+
         BadBreathSound.Stop();
         BadBreathSound.Play();
 
